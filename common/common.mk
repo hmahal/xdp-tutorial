@@ -90,8 +90,8 @@ $(OBJECT_LIBBPF):
 		echo "May need to run git submodule update --init"; \
 		exit 1; \
 	else \
-		cd $(LIBBPF_DIR) && $(MAKE) all; \
-		mkdir -p build; DESTDIR=build $(MAKE) install_headers; \
+		cd $(LIBBPF_DIR) && $(MAKE) all OBJDIR=.; \
+		mkdir -p build; $(MAKE) install_headers DESTDIR=build OBJDIR=.; \
 	fi
 
 # Create dependency: detect if C-file change and touch H-file, to trigger
@@ -107,7 +107,7 @@ $(USER_TARGETS): %: %.c  $(OBJECT_LIBBPF) Makefile $(COMMON_MK) $(COMMON_OBJS) $
 	$(CC) -Wall $(CFLAGS) $(LDFLAGS) -o $@ $(COMMON_OBJS) \
 	 $< $(LIBS)
 
-$(XDP_OBJ): %.o: %.c  Makefile $(COMMON_MK) $(KERN_USER_H) $(EXTRA_DEPS)
+$(XDP_OBJ): %.o: %.c  Makefile $(COMMON_MK) $(KERN_USER_H) $(EXTRA_DEPS) $(OBJECT_LIBBPF)
 	$(CLANG) -S \
 	    -target bpf \
 	    -D __BPF_TRACING__ \
